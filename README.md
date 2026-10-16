@@ -16,3 +16,8 @@ Zeigt das aktuelle Wetter, eine Vorhersage (1 bis 7 Tage mit Slider) und welche 
 - `impressum.html`, `datenschutz.html`
 - `css/style.css`
 - `js/app.js`: Wetter laden und anzeigen
+
+## Team
+
+- Alexander Brodesser (GitHub: AlexanderBrodesser)
+- Lukas Gruber (GitHub: Grubsii)
