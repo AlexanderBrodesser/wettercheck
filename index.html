@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WetterCheck</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <h1>WetterCheck</h1>
+  <p>
+    <a href="index.html">Start</a> |
+    <a href="impressum.html">Impressum</a> |
+    <a href="datenschutz.html">Datenschutz</a>
+  </p>
+
+  <form onsubmit="suchen(); return false;">
+    <input type="text" id="ort" placeholder="Ort eingeben">
+    <button type="submit">Suchen</button>
+  </form>
+
+  <h2 id="ortsname">Linz</h2>
+  <p id="temperatur" class="temperatur"></p>
+  <p id="beschreibung">Wetter wird geladen...</p>
+  <p id="details"></p>
+
+  <h2>Vorhersage</h2>
+  <p>
+    Tage: <span id="anzahl">3</span>
+    <input type="range" id="tage" min="1" max="7" value="3" oninput="zeigeVorhersage()">
+  </p>
+  <table id="vorhersage"></table>
+
+  <h2>Kleidung für heute</h2>
+  <ul id="kleidung"></ul>
+
+  <hr>
+  <p class="klein">
+    Schulprojekt von Alexander Brodesser und Lukas Gruber<br>
+    Wetterdaten von <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0)
+  </p>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
