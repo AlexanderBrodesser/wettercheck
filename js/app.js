@@ -135,19 +135,17 @@ function zeigeWetter() {
   let regen = wetter.daily.precipitation_probability_max[0];
   let code = wetter.current.weather_code;
 
-  document.getElementById('temperatur').innerHTML = temp + '°';
+  document.getElementById('temperatur').innerHTML = temp + ' °C';
   document.getElementById('beschreibung').innerHTML = wetterText(code);
   document.getElementById('details').innerHTML = 'Wind: ' + wind + ' km/h, Regen: ' + regen + ' %';
 
   // Hintergrund je nach Wetter
   if (code <= 2) {
-    document.body.className = 'sonne';
+    document.body.style.backgroundColor = '#fff8e1';
   } else if (code <= 48) {
-    document.body.className = 'wolken';
-  } else if (code >= 71 && code <= 77) {
-    document.body.className = 'schnee';
+    document.body.style.backgroundColor = '#eeeeee';
   } else {
-    document.body.className = 'regen';
+    document.body.style.backgroundColor = '#e3ecf5';
   }
 }
 
@@ -198,9 +196,9 @@ function zeigeKleidung() {
 
 function kleidungsstueck(name, passt) {
   if (passt) {
-    return '<li class="gruen">' + name + ': <span>passt</span></li>';
+    return '<li class="gruen">' + name + ': passt</li>';
   } else {
-    return '<li class="rot">' + name + ': <span>passt nicht</span></li>';
+    return '<li class="rot">' + name + ': passt nicht</li>';
   }
 }
 
