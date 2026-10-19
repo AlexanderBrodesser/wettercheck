@@ -2,13 +2,12 @@
 // Die Wetterdaten kommen von open-meteo.com
 
 let wetter;
+let vorschlaege = [];
 
-async function wetterLaden(ort) {
-  document.getElementById('beschreibung').innerHTML = 'Wetter wird geladen...';
-
+// Koordinaten zu einem Ortsnamen suchen, dann das Wetter laden
+async function ortSuchen(name) {
   try {
-    // zuerst die Koordinaten vom Ort suchen
-    let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + ort);
+    let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + name);
     let daten = await antwort.json();
 
     if (daten.results == undefined) {
@@ -16,12 +15,19 @@ async function wetterLaden(ort) {
       return;
     }
 
-    let lat = daten.results[0].latitude;
-    let lon = daten.results[0].longitude;
-    document.getElementById('ortsname').innerHTML = daten.results[0].name;
+    let ort = daten.results[0];
+    wetterLaden(ort.name, ort.latitude, ort.longitude);
+  } catch (fehler) {
+    document.getElementById('beschreibung').innerHTML = 'Fehler beim Suchen vom Ort';
+  }
+}
 
-    // dann das Wetter für die Koordinaten holen
-    antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
+async function wetterLaden(name, lat, lon) {
+  document.getElementById('beschreibung').innerHTML = 'Wetter wird geladen...';
+  document.getElementById('ortsname').innerHTML = name;
+
+  try {
+    let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
       + '&current=temperature_2m,weather_code,wind_speed_10m'
       + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
       + '&timezone=auto');
@@ -36,10 +42,72 @@ async function wetterLaden(ort) {
   zeigeKleidung();
 }
 
+// prüft, ob die Eingabe ein Vorschlag aus der Liste ist
+function findeVorschlag(text) {
+  for (let i = 0; i < vorschlaege.length; i++) {
+    if (vorschlaege[i].text == text) {
+      return vorschlaege[i];
+    }
+  }
+  return null;
+}
+
 function suchen() {
-  let ort = document.getElementById('ort').value;
-  if (ort != '') {
-    wetterLaden(ort);
+  let eingabe = document.getElementById('ort').value;
+  if (eingabe == '') {
+    return;
+  }
+
+  let vorschlag = findeVorschlag(eingabe);
+  if (vorschlag != null) {
+    wetterLaden(vorschlag.name, vorschlag.lat, vorschlag.lon);
+  } else {
+    ortSuchen(eingabe);
+  }
+}
+
+// wird bei jeder Eingabe im Suchfeld aufgerufen
+async function vorschlaegeLaden() {
+  let eingabe = document.getElementById('ort').value;
+
+  // wenn ein Vorschlag angeklickt wurde, gleich das Wetter laden
+  let vorschlag = findeVorschlag(eingabe);
+  if (vorschlag != null) {
+    wetterLaden(vorschlag.name, vorschlag.lat, vorschlag.lon);
+    return;
+  }
+
+  if (eingabe.length < 2) {
+    return;
+  }
+
+  let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=de&name=' + eingabe);
+  let daten = await antwort.json();
+
+  let liste = document.getElementById('vorschlaege');
+  liste.innerHTML = '';
+  vorschlaege = [];
+
+  if (daten.results == undefined) {
+    return;
+  }
+
+  for (let i = 0; i < daten.results.length; i++) {
+    let ort = daten.results[i];
+
+    let text = ort.name;
+    if (ort.admin1 != undefined) {
+      text += ', ' + ort.admin1;
+    }
+    if (ort.country != undefined) {
+      text += ', ' + ort.country;
+    }
+
+    vorschlaege.push({ text: text, name: ort.name, lat: ort.latitude, lon: ort.longitude });
+
+    let option = document.createElement('option');
+    option.value = text;
+    liste.appendChild(option);
   }
 }
 
@@ -136,4 +204,4 @@ function kleidungsstueck(name, passt) {
   }
 }
 
-wetterLaden('Linz');
+wetterLaden('Linz', 48.3064, 14.2861);

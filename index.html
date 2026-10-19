@@ -11,7 +11,8 @@
   <header>
     <h1><a href="index.html">WetterCheck</a></h1>
     <form onsubmit="suchen(); return false;">
-      <input type="text" id="ort" placeholder="Ort eingeben">
+      <input type="text" id="ort" placeholder="Ort eingeben" list="vorschlaege" autocomplete="off" oninput="vorschlaegeLaden()">
+      <datalist id="vorschlaege"></datalist>
       <button type="submit">Suchen</button>
     </form>
   </header>
