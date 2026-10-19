@@ -11,9 +11,9 @@
   <h1>WetterCheck</h1>
 
   <form onsubmit="suchen(); return false;">
-    <input type="text" id="ort" placeholder="Ort eingeben" list="vorschlaege" autocomplete="off" oninput="vorschlaegeLaden()">
-    <datalist id="vorschlaege"></datalist>
+    <input type="text" id="ort" placeholder="Ort eingeben" autocomplete="off" oninput="vorschlaegeLaden()">
     <button type="submit">Suchen</button>
+    <ul id="vorschlaege" class="vorschlaege"></ul>
   </form>
 
   <h2 id="ortsname">Linz</h2>

@@ -2,7 +2,6 @@
 // Die Wetterdaten kommen von open-meteo.com
 
 let wetter;
-let vorschlaege = [];
 
 // Koordinaten zu einem Ortsnamen suchen, dann das Wetter laden
 async function ortSuchen(name) {
@@ -42,26 +41,11 @@ async function wetterLaden(name, lat, lon) {
   zeigeKleidung();
 }
 
-// prüft, ob die Eingabe ein Vorschlag aus der Liste ist
-function findeVorschlag(text) {
-  for (let i = 0; i < vorschlaege.length; i++) {
-    if (vorschlaege[i].text == text) {
-      return vorschlaege[i];
-    }
-  }
-  return null;
-}
-
 function suchen() {
   let eingabe = document.getElementById('ort').value;
-  if (eingabe == '') {
-    return;
-  }
+  document.getElementById('vorschlaege').innerHTML = '';
 
-  let vorschlag = findeVorschlag(eingabe);
-  if (vorschlag != null) {
-    wetterLaden(vorschlag.name, vorschlag.lat, vorschlag.lon);
-  } else {
+  if (eingabe != '') {
     ortSuchen(eingabe);
   }
 }
@@ -69,24 +53,22 @@ function suchen() {
 // wird bei jeder Eingabe im Suchfeld aufgerufen
 async function vorschlaegeLaden() {
   let eingabe = document.getElementById('ort').value;
-
-  // wenn ein Vorschlag angeklickt wurde, gleich das Wetter laden
-  let vorschlag = findeVorschlag(eingabe);
-  if (vorschlag != null) {
-    wetterLaden(vorschlag.name, vorschlag.lat, vorschlag.lon);
-    return;
-  }
+  let liste = document.getElementById('vorschlaege');
 
   if (eingabe.length < 2) {
+    liste.innerHTML = '';
     return;
   }
 
   let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=de&name=' + eingabe);
   let daten = await antwort.json();
 
-  let liste = document.getElementById('vorschlaege');
+  // falls inzwischen weitergetippt wurde, die alte Antwort ignorieren
+  if (document.getElementById('ort').value != eingabe) {
+    return;
+  }
+
   liste.innerHTML = '';
-  vorschlaege = [];
 
   if (daten.results == undefined) {
     return;
@@ -103,13 +85,21 @@ async function vorschlaegeLaden() {
       text += ', ' + ort.country;
     }
 
-    vorschlaege.push({ text: text, name: ort.name, lat: ort.latitude, lon: ort.longitude });
-
-    let option = document.createElement('option');
-    option.value = text;
-    liste.appendChild(option);
+    let eintrag = document.createElement('li');
+    eintrag.textContent = text;
+    eintrag.onclick = function () {
+      document.getElementById('ort').value = '';
+      liste.innerHTML = '';
+      wetterLaden(ort.name, ort.latitude, ort.longitude);
+    };
+    liste.appendChild(eintrag);
   }
 }
+
+// Klick irgendwo auf die Seite schließt die Vorschläge
+document.addEventListener('click', function () {
+  document.getElementById('vorschlaege').innerHTML = '';
+});
 
 function wetterText(code) {
   if (code == 0) {
