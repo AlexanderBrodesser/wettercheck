@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontakt | WetterCheck</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <h1><a href="index.html">WetterCheck</a></h1>
+
+  <div class="box">
+    <h2>Kontakt</h2>
+    <p>Du hast eine Frage zum Projekt oder einen Fehler gefunden? Schreib uns.</p>
+
+    <form class="kontakt-formular" onsubmit="nachrichtSenden(); return false;">
+      <label>
+        Name
+        <input type="text" id="name" required>
+      </label>
+      <label>
+        Betreff
+        <input type="text" id="betreff" value="Frage zu WetterCheck">
+      </label>
+      <label>
+        Nachricht
+        <textarea id="nachricht" rows="6" required></textarea>
+      </label>
+      <button type="submit">E-Mail schreiben</button>
+    </form>
+
+    <p class="hinweis">Beim Absenden öffnet sich dein E-Mail-Programm mit der fertigen Nachricht.</p>
+  </div>
+
+  <div class="box">
+    <h2>Team</h2>
+    <p>
+      Alexander Brodesser: <a href="mailto:alexander.brodesser@tfs-haslach.at">alexander.brodesser@tfs-haslach.at</a><br>
+      Lukas Gruber: <a href="mailto:lukas.gruber@tfs-haslach.at">lukas.gruber@tfs-haslach.at</a>
+    </p>
+  </div>
+
+  <footer>
+    <p>
+      <a href="index.html">Startseite</a> |
+      <a href="kontakt.html">Kontakt</a> |
+      <a href="impressum.html">Impressum</a> |
+      <a href="datenschutz.html">Datenschutz</a>
+    </p>
+  </footer>
+
+  <script src="js/kontakt.js"></script>
+</body>
+</html>

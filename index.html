@@ -8,38 +8,55 @@
 </head>
 <body>
 
-  <h1>WetterCheck</h1>
+  <video id="hintergrund" class="hintergrund" autoplay muted loop playsinline></video>
+  <div class="abdunkeln"></div>
 
-  <form onsubmit="suchen(); return false;">
-    <input type="text" id="ort" placeholder="Ort eingeben" autocomplete="off" oninput="vorschlaegeLaden()">
-    <button type="submit">Suchen</button>
-    <ul id="vorschlaege" class="vorschlaege"></ul>
-  </form>
+  <header>
+    <h1>WetterCheck</h1>
 
-  <h2 id="ortsname">Linz</h2>
-  <p id="temperatur" class="temperatur"></p>
-  <p id="beschreibung">Wetter wird geladen...</p>
-  <p id="details"></p>
+    <form onsubmit="suchen(); return false;">
+      <input type="text" id="ort" placeholder="Ort eingeben" autocomplete="off" oninput="vorschlaegeLaden()">
+      <button type="submit">Suchen</button>
+      <button type="button" class="standort" onclick="standortLaden()">Mein Standort</button>
+      <ul id="vorschlaege"></ul>
+    </form>
+  </header>
 
-  <h2>Vorhersage</h2>
-  <p>
-    Tage: <span id="anzahl">3</span>
-    <input type="range" id="tage" min="1" max="7" value="3" oninput="zeigeVorhersage()">
-  </p>
-  <table id="vorhersage"></table>
+  <div class="box">
+    <h2 id="ortsname">Linz</h2>
+    <p id="temperatur" class="temperatur"></p>
+    <p id="beschreibung">Wetter wird geladen...</p>
+    <p id="details" class="details"></p>
+  </div>
 
-  <h2>Kleidung für heute</h2>
-  <ul id="kleidung"></ul>
+  <div class="box">
+    <h2>Vorhersage</h2>
+    <p>
+      Tage: <span id="anzahl">3</span>
+      <input type="range" id="tage" min="1" max="7" value="3" oninput="tagAuswaehlen(0)">
+    </p>
+    <table id="vorhersage"></table>
+    <p class="hinweis">Tipp: Auf einen Tag klicken, um die Kleidung für diesen Tag zu sehen.</p>
+  </div>
 
-  <hr>
-  <p class="klein">
-    <a href="impressum.html">Impressum</a> |
-    <a href="datenschutz.html">Datenschutz</a>
-  </p>
-  <p class="klein">
-    Schulprojekt von Alexander Brodesser und Lukas Gruber<br>
-    Wetterdaten von <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0)
-  </p>
+  <div class="box">
+    <h2 id="kleidung-titel">Kleidung für heute</h2>
+    <p id="empfehlung" class="empfehlung"></p>
+    <ul id="kleidung" class="kleidung"></ul>
+  </div>
+
+  <footer>
+    <p>
+      <a href="kontakt.html">Kontakt</a> |
+      <a href="impressum.html">Impressum</a> |
+      <a href="datenschutz.html">Datenschutz</a>
+    </p>
+    <p>
+      Schulprojekt von Alexander Brodesser und Lukas Gruber<br>
+      Wetterdaten von <a href="https://open-meteo.com/">Open-Meteo.com</a> (CC BY 4.0),
+      Videos von <a href="https://www.pexels.com/">Pexels</a>
+    </p>
+  </footer>
 
   <script src="js/app.js"></script>
 </body>

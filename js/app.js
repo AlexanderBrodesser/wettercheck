@@ -1,44 +1,41 @@
 // WetterCheck
-// Die Wetterdaten kommen von open-meteo.com
+// Wetterdaten von open-meteo.com, Videos von pexels.com
 
 let wetter;
+let tag = 0;
 
-// Koordinaten zu einem Ortsnamen suchen, dann das Wetter laden
+let videos = {
+  sonne: 'https://videos.pexels.com/video-files/1345924/1345924-hd_1920_1080_30fps.mp4',
+  wolken: 'https://videos.pexels.com/video-files/12460328/12460328-hd_1080_1920_60fps.mp4',
+  regen: 'https://videos.pexels.com/video-files/854204/854204-hd_1920_1080_30fps.mp4',
+  wind: 'https://videos.pexels.com/video-files/36306743/15397108_1920_1080_60fps.mp4'
+};
+
 async function ortSuchen(name) {
-  try {
-    let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + name);
-    let daten = await antwort.json();
+  let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + name);
+  let daten = await antwort.json();
 
-    if (daten.results == undefined) {
-      document.getElementById('beschreibung').innerHTML = 'Ort nicht gefunden';
-      return;
-    }
-
-    let ort = daten.results[0];
-    wetterLaden(ort.name, ort.latitude, ort.longitude);
-  } catch (fehler) {
-    document.getElementById('beschreibung').innerHTML = 'Fehler beim Suchen vom Ort';
-  }
-}
-
-async function wetterLaden(name, lat, lon) {
-  document.getElementById('beschreibung').innerHTML = 'Wetter wird geladen...';
-  document.getElementById('ortsname').innerHTML = name;
-
-  try {
-    let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
-      + '&current=temperature_2m,weather_code,wind_speed_10m'
-      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
-      + '&timezone=auto');
-    wetter = await antwort.json();
-  } catch (fehler) {
-    document.getElementById('beschreibung').innerHTML = 'Fehler beim Laden der Wetterdaten';
+  if (daten.results == undefined) {
+    document.getElementById('beschreibung').innerHTML = 'Ort nicht gefunden';
     return;
   }
 
+  let ort = daten.results[0];
+  wetterLaden(ort.name, ort.latitude, ort.longitude);
+}
+
+async function wetterLaden(name, lat, lon) {
+  document.getElementById('ortsname').innerHTML = name;
+  localStorage.setItem('ort', JSON.stringify({ name: name, lat: lat, lon: lon }));
+
+  let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
+    + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m'
+    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max'
+    + '&timezone=auto');
+  wetter = await antwort.json();
+
   zeigeWetter();
-  zeigeVorhersage();
-  zeigeKleidung();
+  tagAuswaehlen(0);
 }
 
 function suchen() {
@@ -50,7 +47,6 @@ function suchen() {
   }
 }
 
-// wird bei jeder Eingabe im Suchfeld aufgerufen
 async function vorschlaegeLaden() {
   let eingabe = document.getElementById('ort').value;
   let liste = document.getElementById('vorschlaege');
@@ -62,44 +58,33 @@ async function vorschlaegeLaden() {
 
   let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=de&name=' + eingabe);
   let daten = await antwort.json();
-
-  // falls inzwischen weitergetippt wurde, die alte Antwort ignorieren
-  if (document.getElementById('ort').value != eingabe) {
-    return;
-  }
-
   liste.innerHTML = '';
 
   if (daten.results == undefined) {
     return;
   }
 
-  for (let i = 0; i < daten.results.length; i++) {
-    let ort = daten.results[i];
-
-    let text = ort.name;
-    if (ort.admin1 != undefined) {
-      text += ', ' + ort.admin1;
-    }
-    if (ort.country != undefined) {
-      text += ', ' + ort.country;
-    }
-
+  for (let ort of daten.results) {
     let eintrag = document.createElement('li');
-    eintrag.textContent = text;
+    eintrag.textContent = ort.name + ', ' + ort.country;
     eintrag.onclick = function () {
       document.getElementById('ort').value = '';
-      liste.innerHTML = '';
       wetterLaden(ort.name, ort.latitude, ort.longitude);
     };
     liste.appendChild(eintrag);
   }
 }
 
-// Klick irgendwo auf die Seite schließt die Vorschläge
-document.addEventListener('click', function () {
+function standortLaden() {
+  navigator.geolocation.getCurrentPosition(function (position) {
+    wetterLaden('Mein Standort', position.coords.latitude, position.coords.longitude);
+  });
+}
+
+// Klick irgendwo schließt die Vorschläge
+document.onclick = function () {
   document.getElementById('vorschlaege').innerHTML = '';
-});
+};
 
 function wetterText(code) {
   if (code == 0) {
@@ -120,76 +105,139 @@ function wetterText(code) {
 }
 
 function zeigeWetter() {
-  let temp = Math.round(wetter.current.temperature_2m);
-  let wind = Math.round(wetter.current.wind_speed_10m);
-  let regen = wetter.daily.precipitation_probability_max[0];
-  let code = wetter.current.weather_code;
+  let jetzt = wetter.current;
+  let min = Math.round(wetter.daily.temperature_2m_min[0]);
+  let max = Math.round(wetter.daily.temperature_2m_max[0]);
 
-  document.getElementById('temperatur').innerHTML = temp + ' °C';
-  document.getElementById('beschreibung').innerHTML = wetterText(code);
-  document.getElementById('details').innerHTML = 'Wind: ' + wind + ' km/h, Regen: ' + regen + ' %';
+  document.getElementById('temperatur').innerHTML = Math.round(jetzt.temperature_2m) + ' °C';
+  document.getElementById('beschreibung').innerHTML = wetterText(jetzt.weather_code);
+  document.getElementById('details').innerHTML = 'Gefühlt ' + Math.round(jetzt.apparent_temperature) + ' °C, heute ' + min + ' bis ' + max + ' °C<br>'
+    + 'Wind: ' + Math.round(jetzt.wind_speed_10m) + ' km/h, Regen: ' + wetter.daily.precipitation_probability_max[0] + ' %';
+}
 
-  // Hintergrund je nach Wetter
-  if (code <= 2) {
-    document.body.style.backgroundColor = '#fff8e1';
-  } else if (code <= 48) {
-    document.body.style.backgroundColor = '#eeeeee';
+function zeigeVideo(code, wind) {
+  let name = 'wolken';
+  let text = wetterText(code);
+
+  if (text == 'Sonnig' || text == 'Leicht bewölkt') {
+    name = 'sonne';
+  }
+  if (wind >= 30) {
+    name = 'wind';
+  }
+  if (text == 'Regen' || text == 'Gewitter') {
+    name = 'regen';
+  }
+
+  let video = document.getElementById('hintergrund');
+  if (video.src != videos[name]) {
+    video.src = videos[name];
+  }
+}
+
+function tagName(i) {
+  if (i == 0) {
+    return 'heute';
+  }
+  if (i == 1) {
+    return 'morgen';
+  }
+
+  let wochentage = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+  let datum = new Date(wetter.daily.time[i]);
+  return wochentage[datum.getDay()];
+}
+
+function tagAuswaehlen(i) {
+  if (wetter == undefined) {
+    return;
+  }
+
+  tag = i;
+  zeigeVorhersage();
+  zeigeKleidung();
+
+  if (i == 0) {
+    zeigeVideo(wetter.current.weather_code, wetter.current.wind_speed_10m);
   } else {
-    document.body.style.backgroundColor = '#e3ecf5';
+    zeigeVideo(wetter.daily.weather_code[i], wetter.daily.wind_speed_10m_max[i]);
   }
 }
 
 function zeigeVorhersage() {
   let tage = document.getElementById('tage').value;
+  let d = wetter.daily;
   document.getElementById('anzahl').innerHTML = tage;
 
-  if (wetter == undefined) {
-    return;
-  }
-
-  let wochentage = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   let html = '<tr><th>Tag</th><th>Wetter</th><th>Min</th><th>Max</th><th>Regen</th></tr>';
 
   for (let i = 0; i < tage; i++) {
-    let datum = new Date(wetter.daily.time[i]);
-    let tag = wochentage[datum.getDay()];
-    if (i == 0) {
-      tag = 'Heute';
+    let klasse = '';
+    if (i == tag) {
+      klasse = 'gewaehlt';
     }
 
-    html += '<tr>';
-    html += '<td>' + tag + '</td>';
-    html += '<td>' + wetterText(wetter.daily.weather_code[i]) + '</td>';
-    html += '<td>' + Math.round(wetter.daily.temperature_2m_min[i]) + ' °C</td>';
-    html += '<td>' + Math.round(wetter.daily.temperature_2m_max[i]) + ' °C</td>';
-    html += '<td>' + wetter.daily.precipitation_probability_max[i] + ' %</td>';
-    html += '</tr>';
+    html += '<tr class="' + klasse + '" onclick="tagAuswaehlen(' + i + ')">'
+      + '<td>' + tagName(i) + '</td>'
+      + '<td>' + wetterText(d.weather_code[i]) + '</td>'
+      + '<td>' + Math.round(d.temperature_2m_min[i]) + ' °C</td>'
+      + '<td>' + Math.round(d.temperature_2m_max[i]) + ' °C</td>'
+      + '<td>' + d.precipitation_probability_max[i] + ' %</td>'
+      + '</tr>';
   }
 
   document.getElementById('vorhersage').innerHTML = html;
 }
 
 function zeigeKleidung() {
-  let temp = wetter.daily.temperature_2m_max[0];
-  let regen = wetter.daily.precipitation_probability_max[0];
+  let temp = wetter.daily.temperature_2m_max[tag];
+  let regen = wetter.daily.precipitation_probability_max[tag];
+  let code = wetter.daily.weather_code[tag];
+
+  document.getElementById('kleidung-titel').innerHTML = 'Kleidung für ' + tagName(tag);
+
+  let teile = [
+    ['T-Shirt', 'tshirt', temp >= 20],
+    ['Hoodie', 'hoodie', temp >= 10 && temp < 20],
+    ['Jacke', 'jacke', temp < 10],
+    ['Haube', 'haube', temp < 5],
+    ['Lange Hose', 'hose', temp < 22],
+    ['Kurze Hose', 'kurzehose', temp >= 22],
+    ['Regenschirm', 'regenschirm', regen >= 40],
+    ['Sonnenbrille', 'sonnenbrille', code <= 1]
+  ];
 
   let html = '';
-  html += kleidungsstueck('T-Shirt', temp >= 20);
-  html += kleidungsstueck('Hoodie', temp >= 10 && temp < 20);
-  html += kleidungsstueck('Jacke', temp < 10);
-  html += kleidungsstueck('Lange Hose', temp < 22);
-  html += kleidungsstueck('Kurze Hose', temp >= 22);
-  html += kleidungsstueck('Regenschirm', regen >= 40);
+  let passend = [];
+
+  for (let teil of teile) {
+    html += karte(teil[0], teil[1], teil[2]);
+    if (teil[2]) {
+      passend.push(teil[0]);
+    }
+  }
 
   document.getElementById('kleidung').innerHTML = html;
+  document.getElementById('empfehlung').innerHTML = 'Am besten: ' + passend.join(', ');
 }
 
-function kleidungsstueck(name, passt) {
+function karte(name, bild, passt) {
+  let klasse = 'rot';
+  let text = 'passt nicht';
+
   if (passt) {
-    return '<li class="gruen">' + name + ': passt</li>';
-  } else {
-    return '<li class="rot">' + name + ': passt nicht</li>';
+    klasse = 'gruen';
+    text = 'passt';
   }
+
+  return '<li class="' + klasse + '"><img src="bilder/' + bild + '.svg" alt="' + name + '"><b>' + name + '</b><br>' + text + '</li>';
 }
 
-wetterLaden('Linz', 48.3064, 14.2861);
+// zuletzt gesuchten Ort laden, sonst Linz
+let gespeichert = localStorage.getItem('ort');
+if (gespeichert) {
+  let ort = JSON.parse(gespeichert);
+  wetterLaden(ort.name, ort.lat, ort.lon);
+} else {
+  wetterLaden('Linz', 48.31, 14.29);
+}
