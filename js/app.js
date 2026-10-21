@@ -5,15 +5,25 @@ let wetter;
 let tag = 0;
 
 let videos = {
-  sonne: 'https://videos.pexels.com/video-files/1345924/1345924-hd_1920_1080_30fps.mp4',
-  wolken: 'https://videos.pexels.com/video-files/12460328/12460328-hd_1080_1920_60fps.mp4',
-  regen: 'https://videos.pexels.com/video-files/854204/854204-hd_1920_1080_30fps.mp4',
-  wind: 'https://videos.pexels.com/video-files/36306743/15397108_1920_1080_60fps.mp4'
+  sonne: 'https://videos.pexels.com/video-files/4999931/4999931-hd_1280_720_30fps.mp4',
+  wolken: 'https://videos.pexels.com/video-files/17499303/17499303-hd_1280_720_30fps.mp4',
+  regen: 'https://videos.pexels.com/video-files/15419572/15419572-hd_1280_720_30fps.mp4',
+  wind: 'https://videos.pexels.com/video-files/2530656/2530656-hd_1280_720_30fps.mp4'
 };
 
+function fehler(text) {
+  document.getElementById('beschreibung').innerHTML = text;
+}
+
 async function ortSuchen(name) {
-  let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + name);
-  let daten = await antwort.json();
+  let daten;
+  try {
+    let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=de&name=' + name);
+    daten = await antwort.json();
+  } catch (e) {
+    fehler('Keine Verbindung. Bitte später nochmal versuchen.');
+    return;
+  }
 
   if (daten.results == undefined) {
     document.getElementById('beschreibung').innerHTML = 'Ort nicht gefunden';
@@ -26,13 +36,19 @@ async function ortSuchen(name) {
 
 async function wetterLaden(name, lat, lon) {
   document.getElementById('ortsname').innerHTML = name;
-  localStorage.setItem('ort', JSON.stringify({ name: name, lat: lat, lon: lon }));
+  fehler('Wetter wird geladen...');
+  ortMerken(name, lat, lon);
 
-  let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
-    + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m'
-    + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max'
-    + '&timezone=auto');
-  wetter = await antwort.json();
+  try {
+    let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
+      + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,wind_speed_10m_max'
+      + '&timezone=auto');
+    wetter = await antwort.json();
+  } catch (e) {
+    fehler('Keine Verbindung. Bitte später nochmal versuchen.');
+    return;
+  }
 
   zeigeWetter();
   tagAuswaehlen(0);
@@ -56,8 +72,13 @@ async function vorschlaegeLaden() {
     return;
   }
 
-  let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=de&name=' + eingabe);
-  let daten = await antwort.json();
+  let daten;
+  try {
+    let antwort = await fetch('https://geocoding-api.open-meteo.com/v1/search?count=5&language=de&name=' + eingabe);
+    daten = await antwort.json();
+  } catch (e) {
+    return;
+  }
   liste.innerHTML = '';
 
   if (daten.results == undefined) {
@@ -76,9 +97,19 @@ async function vorschlaegeLaden() {
 }
 
 function standortLaden() {
-  navigator.geolocation.getCurrentPosition(function (position) {
-    wetterLaden('Mein Standort', position.coords.latitude, position.coords.longitude);
-  });
+  if (!navigator.geolocation) {
+    fehler('Dein Browser kann den Standort nicht abfragen.');
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    function (position) {
+      wetterLaden('Mein Standort', position.coords.latitude, position.coords.longitude);
+    },
+    function () {
+      fehler('Standort nicht erlaubt. Bitte einen Ort eingeben.');
+    }
+  );
 }
 
 // Klick irgendwo schließt die Vorschläge
@@ -190,7 +221,7 @@ function zeigeVorhersage() {
 }
 
 function zeigeKleidung() {
-  let temp = wetter.daily.temperature_2m_max[tag];
+  let temp = wetter.daily.apparent_temperature_max[tag];
   let regen = wetter.daily.precipitation_probability_max[tag];
   let code = wetter.daily.weather_code[tag];
 
@@ -218,7 +249,7 @@ function zeigeKleidung() {
   }
 
   document.getElementById('kleidung').innerHTML = html;
-  document.getElementById('empfehlung').innerHTML = 'Am besten: ' + passend.join(', ');
+  document.getElementById('empfehlung').innerHTML = 'Gefühlt bis ' + Math.round(temp) + ' °C. Am besten: ' + passend.join(', ');
 }
 
 function karte(name, bild, passt) {
@@ -233,10 +264,30 @@ function karte(name, bild, passt) {
   return '<li class="' + klasse + '"><img src="bilder/' + bild + '.svg" alt="' + name + '"><b>' + name + '</b><br>' + text + '</li>';
 }
 
+// manche Browser sperren localStorage, dann einfach ohne Merken weiter
+function ortMerken(name, lat, lon) {
+  try {
+    localStorage.setItem('ort', JSON.stringify({ name: name, lat: lat, lon: lon }));
+  } catch (e) {
+  }
+}
+
+function gemerkterOrt() {
+  try {
+    return JSON.parse(localStorage.getItem('ort'));
+  } catch (e) {
+    return null;
+  }
+}
+
+// Video erst zeigen, wenn es wirklich läuft
+document.getElementById('hintergrund').onplaying = function () {
+  this.style.opacity = 1;
+};
+
 // zuletzt gesuchten Ort laden, sonst Linz
-let gespeichert = localStorage.getItem('ort');
-if (gespeichert) {
-  let ort = JSON.parse(gespeichert);
+let ort = gemerkterOrt();
+if (ort) {
   wetterLaden(ort.name, ort.lat, ort.lon);
 } else {
   wetterLaden('Linz', 48.31, 14.29);

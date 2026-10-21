@@ -18,6 +18,7 @@ Zeigt das aktuelle Wetter, eine Vorhersage (1 bis 7 Tage mit Slider) und welche 
 - `css/style.css`
 - `js/app.js`: Wetter laden und anzeigen
 - `js/kontakt.js`: Kontaktformular
+- `js/dunkel.js`: Dark Mode
 - `bilder/`: Bilder der Kleidungsstücke (selbst gezeichnet)
 
 ## Team
