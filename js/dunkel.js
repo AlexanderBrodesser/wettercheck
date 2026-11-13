@@ -1,7 +1,19 @@
 // Dark Mode ein- und ausschalten
 
+function buttonTextAktualisieren() {
+  let btn = document.getElementById('dunkel-btn');
+  if (btn) {
+    if (document.body.classList.contains('dunkel')) {
+      btn.textContent = 'White Mode';
+    } else {
+      btn.textContent = 'Dark Mode';
+    }
+  }
+}
+
 function dunkelUmschalten() {
   document.body.classList.toggle('dunkel');
+  buttonTextAktualisieren();
 
   try {
     localStorage.setItem('dunkel', document.body.classList.contains('dunkel'));
@@ -16,3 +28,5 @@ try {
   }
 } catch (e) {
 }
+
+buttonTextAktualisieren();
