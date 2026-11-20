@@ -4,7 +4,9 @@ Schulprojekt MTSP, 3ITM 2026/27, Alexander Brodesser und Lukas Gruber
 
 Website: https://alexanderbrodesser.github.io/wettercheck/
 
-Zeigt das aktuelle Wetter, eine Vorhersage (1 bis 7 Tage mit Slider), eine Gewitterwarnung für Österreich und Nachbarländer und welche Kleidung passt (grün) oder nicht passt (rot).
+## Inhalt
+
+Zeigt das aktuelle Wetter, eine Vorhersage (1 bis 7 Tage mit Slider), eine Gewitterwarnung für Österreich und Nachbarländer (Mit Warnungsbutton rechts oben) und welche Kleidung passt (grün) oder nicht passt (rot).
 
 ## Starten
 
