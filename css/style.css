@@ -283,3 +283,45 @@ body.dunkel {
 .dunkel .abdunkeln {
   background-color: rgba(0, 0, 0, 0.6);
 }
+
+/* Warnsymbol neben dem Ortsnamen */
+.ortszeile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.warnung {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #aaa;
+  border-radius: 50%;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 26px;
+  font-weight: bold;
+  cursor: help;
+}
+
+.warnung.neutral {
+  color: #555;
+  background-color: white;
+}
+
+.warnung.orange {
+  color: #542600;
+  background-color: #ff9f1c;
+  border-color: #e07800;
+}
+
+.warnung.rot {
+  color: white;
+  background-color: #d93025;
+  border-color: #b51f18;
+}
+
+.dunkel .warnung.neutral {
+  color: white;
+  background-color: #555;
+  border-color: #888;
+}

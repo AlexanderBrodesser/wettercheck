@@ -43,6 +43,7 @@ async function wetterLaden(name, lat, lon) {
     let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
       + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m'
       + '&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,wind_speed_10m_max'
+      + '&hourly=weather_code'
       + '&timezone=auto');
     wetter = await antwort.json();
   } catch (e) {
@@ -51,7 +52,57 @@ async function wetterLaden(name, lat, lon) {
   }
 
   zeigeWetter();
+  zeigeWarnung();
   tagAuswaehlen(0);
+}
+
+// Warnsymbol neben dem Ortsnamen
+// rot = starkes Gewitter, orange = Gewitter, Regen, Schnee oder starker Wind
+function zeigeWarnung() {
+  let jetzt = wetter.current;
+  let stunde = new Date(jetzt.time).getHours();
+  let codes = [jetzt.weather_code];
+
+  // Wettercodes für die nächsten 24 Stunden dazunehmen
+  for (let i = stunde; i < stunde + 24; i++) {
+    codes.push(wetter.hourly.weather_code[i]);
+  }
+
+  let starkesGewitter = false;
+  let gewitter = false;
+  let nass = false;
+
+  for (let code of codes) {
+    if (code == 99) {
+      starkesGewitter = true;
+    } else if (code == 95 || code == 96) {
+      gewitter = true;
+    } else if (code >= 51) {
+      nass = true;
+    }
+  }
+
+  let wind = jetzt.wind_speed_10m;
+  let regen = wetter.daily.precipitation_probability_max[0];
+
+  let stufe = 'neutral';
+  let text = 'Keine besondere Wetterwarnung.';
+
+  if (starkesGewitter) {
+    stufe = 'rot';
+    text = 'Starkes Gewitter möglich! Bei Gewitter in einem Gebäude Schutz suchen.';
+  } else if (gewitter) {
+    stufe = 'orange';
+    text = 'Gewitter möglich. Das Wetter im Blick behalten.';
+  } else if (nass || wind >= 40 || regen >= 60) {
+    stufe = 'orange';
+    text = 'Regen, Schnee oder starker Wind möglich.';
+  }
+
+  let symbol = document.getElementById('warnung');
+  symbol.className = 'warnung ' + stufe;
+  symbol.title = text;
+  symbol.setAttribute('aria-label', text);
 }
 
 function suchen() {
