@@ -242,7 +242,7 @@ body.dunkel {
   background-color: #222;
 }
 
-.dunkel .box a {
+.dunkel .box a:not(.warnung) {
   color: #8fb8e0;
 }
 
@@ -300,7 +300,7 @@ body.dunkel {
   text-align: center;
   line-height: 26px;
   font-weight: bold;
-  cursor: help;
+  text-decoration: none;
 }
 
 .warnung.neutral {

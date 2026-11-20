@@ -3,12 +3,26 @@
 
 let wetter;
 let tag = 0;
+let land = 'AT';
 
 let videos = {
   sonne: 'https://videos.pexels.com/video-files/4999931/4999931-hd_1280_720_30fps.mp4',
   wolken: 'https://videos.pexels.com/video-files/17499303/17499303-hd_1280_720_30fps.mp4',
   regen: 'https://videos.pexels.com/video-files/15419572/15419572-hd_1280_720_30fps.mp4',
   wind: 'https://videos.pexels.com/video-files/2530656/2530656-hd_1280_720_30fps.mp4'
+};
+
+// offizielle Warnseiten für Österreich und die Nachbarländer
+let warnseiten = {
+  AT: 'https://warnungen.zamg.at/wsapp/',
+  DE: 'https://www.wettergefahren.de/warnungen/warnsituation.html',
+  CH: 'https://meteoalarm.org/en/live/region/CH',
+  LI: 'https://meteoalarm.org/en/live/region/CH',
+  IT: 'https://meteoalarm.org/en/live/region/IT',
+  SI: 'https://meteoalarm.org/en/live/region/SI',
+  HU: 'https://meteoalarm.org/en/live/region/HU',
+  SK: 'https://meteoalarm.org/en/live/region/SK',
+  CZ: 'https://meteoalarm.org/en/live/region/CZ'
 };
 
 function fehler(text) {
@@ -31,13 +45,19 @@ async function ortSuchen(name) {
   }
 
   let ort = daten.results[0];
-  wetterLaden(ort.name, ort.latitude, ort.longitude);
+  wetterLaden(ort.name, ort.latitude, ort.longitude, ort.country_code);
 }
 
-async function wetterLaden(name, lat, lon) {
+async function wetterLaden(name, lat, lon, landCode) {
   document.getElementById('ortsname').innerHTML = name;
   fehler('Wetter wird geladen...');
-  ortMerken(name, lat, lon);
+  ortMerken(name, lat, lon, landCode);
+
+  // ohne Land (z. B. beim eigenen Standort) wird Österreich genommen
+  land = 'AT';
+  if (landCode) {
+    land = landCode;
+  }
 
   try {
     let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
@@ -101,8 +121,14 @@ function zeigeWarnung() {
 
   let symbol = document.getElementById('warnung');
   symbol.className = 'warnung ' + stufe;
-  symbol.title = text;
-  symbol.setAttribute('aria-label', text);
+  symbol.title = text + ' Klicken für die Warnungen des Wetterdienstes.';
+
+  // Link zur Warnseite vom Land, sonst Österreich
+  if (warnseiten[land]) {
+    symbol.href = warnseiten[land];
+  } else {
+    symbol.href = warnseiten.AT;
+  }
 }
 
 function suchen() {
@@ -141,7 +167,7 @@ async function vorschlaegeLaden() {
     eintrag.textContent = ort.name + ', ' + ort.country;
     eintrag.onclick = function () {
       document.getElementById('ort').value = '';
-      wetterLaden(ort.name, ort.latitude, ort.longitude);
+      wetterLaden(ort.name, ort.latitude, ort.longitude, ort.country_code);
     };
     liste.appendChild(eintrag);
   }
@@ -316,9 +342,9 @@ function karte(name, bild, passt) {
 }
 
 // manche Browser sperren localStorage, dann einfach ohne Merken weiter
-function ortMerken(name, lat, lon) {
+function ortMerken(name, lat, lon, landCode) {
   try {
-    localStorage.setItem('ort', JSON.stringify({ name: name, lat: lat, lon: lon }));
+    localStorage.setItem('ort', JSON.stringify({ name: name, lat: lat, lon: lon, land: landCode }));
   } catch (e) {
   }
 }
@@ -339,7 +365,7 @@ document.getElementById('hintergrund').onplaying = function () {
 // zuletzt gesuchten Ort laden, sonst Linz
 let ort = gemerkterOrt();
 if (ort) {
-  wetterLaden(ort.name, ort.lat, ort.lon);
+  wetterLaden(ort.name, ort.lat, ort.lon, ort.land);
 } else {
-  wetterLaden('Linz', 48.31, 14.29);
+  wetterLaden('Linz', 48.31, 14.29, 'AT');
 }
