@@ -6,7 +6,7 @@ Website: https://alexanderbrodesser.github.io/wettercheck/
 
 ## Inhalt
 
-Die Website zeigt, das aktuelle Wetter, eine Wettervorhersage (1 bis 7 Tage mit Slider), eine Gewitterwarnung für Österreich und Nachbarländer (Mit Warnungsbutton rechts oben) und welche Kleidung passt (grün) oder nicht passt (rot).
+Die Website zeigt, das aktuelle Wetter, eine Wettervorhersage (1 bis 7 Tage mit Slider), eine Gewitterwarnung für Österreich und Nachbarländer (Mit Warnungsbutton rechts oben), einbau von Sonnenaufgang und Sonnenuntergang und welche Kleidung passt (grün) oder nicht passt (rot).
 
 ## Starten
 
