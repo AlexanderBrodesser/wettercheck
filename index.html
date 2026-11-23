@@ -29,7 +29,10 @@
 
   <div class="box">
     <div class="ortszeile">
-      <h2 id="ortsname">Linz</h2>
+      <div class="ortsname-gruppe">
+        <h2 id="ortsname">Linz</h2>
+        <span id="ortszeit" class="ortszeit"></span>
+      </div>
       <a id="warnung" class="warnung neutral" href="https://warnungen.zamg.at/wsapp/" target="_blank" rel="noopener" title="Keine besondere Wetterwarnung.">!</a>
     </div>
     <p id="temperatur" class="temperatur"></p>
@@ -39,10 +42,14 @@
 
   <div class="box">
     <h2>Vorhersage</h2>
-    <p>
-      Tage: <span id="anzahl">3</span>
-      <input type="range" id="tage" min="1" max="7" value="3" oninput="tagAuswaehlen(0)">
-    </p>
+    <div class="vorhersage-steuerung">
+      <p>
+        Tage: <span id="anzahl">3</span>
+        <input type="range" id="tage" min="1" max="7" value="3" oninput="tagAuswaehlen(0)">
+      </p>
+      <p id="sonnenzeiten" class="sonnenzeiten"></p>
+    </div>
+    <div id="verlauf" class="verlauf"></div>
     <table id="vorhersage"></table>
     <p class="hinweis">Tipp: Auf einen Tag klicken, um die Kleidung für diesen Tag zu sehen.</p>
   </div>

@@ -9,7 +9,8 @@ let videos = {
   sonne: 'https://videos.pexels.com/video-files/4999931/4999931-hd_1280_720_30fps.mp4',
   wolken: 'https://videos.pexels.com/video-files/17499303/17499303-hd_1280_720_30fps.mp4',
   regen: 'https://videos.pexels.com/video-files/15419572/15419572-hd_1280_720_30fps.mp4',
-  wind: 'https://videos.pexels.com/video-files/2530656/2530656-hd_1280_720_30fps.mp4'
+  wind: 'https://videos.pexels.com/video-files/2530656/2530656-hd_1280_720_30fps.mp4',
+  schnee: 'https://videos.pexels.com/video-files/33701652/14314590_1280_720_30fps.mp4'
 };
 
 // offizielle Warnseiten für Österreich und die Nachbarländer
@@ -62,7 +63,7 @@ async function wetterLaden(name, lat, lon, landCode) {
   try {
     let antwort = await fetch('https://api.open-meteo.com/v1/forecast?latitude=' + lat + '&longitude=' + lon
       + '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m'
-      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,wind_speed_10m_max'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,precipitation_probability_max,wind_speed_10m_max,sunrise,sunset'
       + '&hourly=weather_code'
       + '&timezone=auto');
     wetter = await antwort.json();
@@ -72,6 +73,7 @@ async function wetterLaden(name, lat, lon, landCode) {
   }
 
   zeigeWetter();
+  zeigeOrtszeit();
   zeigeWarnung();
   tagAuswaehlen(0);
 }
@@ -129,6 +131,28 @@ function zeigeWarnung() {
   } else {
     symbol.href = warnseiten.AT;
   }
+}
+
+// Uhrzeit am gesuchten Ort (Open-Meteo liefert die Zeitzone mit)
+function zeigeOrtszeit() {
+  if (wetter == undefined) {
+    return;
+  }
+
+  let zeit = new Date().toLocaleTimeString('de-AT', { timeZone: wetter.timezone, hour: '2-digit', minute: '2-digit' });
+  document.getElementById('ortszeit').innerHTML = zeit + ' Uhr';
+}
+
+// jede Minute die Uhrzeit neu anzeigen
+setInterval(zeigeOrtszeit, 60000);
+
+// Sonnenaufgang und -untergang für den gewählten Tag
+function zeigeSonnenzeiten() {
+  // die Zeit kommt als "2026-11-23T07:21", wir brauchen nur den Teil nach dem T
+  let aufgang = wetter.daily.sunrise[tag].split('T')[1];
+  let untergang = wetter.daily.sunset[tag].split('T')[1];
+
+  document.getElementById('sonnenzeiten').innerHTML = 'Sonnenaufgang ' + aufgang + ' Uhr, Sonnenuntergang ' + untergang + ' Uhr';
 }
 
 function suchen() {
@@ -203,7 +227,7 @@ function wetterText(code) {
     return 'Bewölkt';
   } else if (code == 45 || code == 48) {
     return 'Nebel';
-  } else if (code >= 71 && code <= 77) {
+  } else if ((code >= 71 && code <= 77) || code == 85 || code == 86) {
     return 'Schnee';
   } else if (code >= 95) {
     return 'Gewitter';
@@ -236,6 +260,9 @@ function zeigeVideo(code, wind) {
   if (text == 'Regen' || text == 'Gewitter') {
     name = 'regen';
   }
+  if (text == 'Schnee') {
+    name = 'schnee';
+  }
 
   let video = document.getElementById('hintergrund');
   if (video.src != videos[name]) {
@@ -263,6 +290,8 @@ function tagAuswaehlen(i) {
 
   tag = i;
   zeigeVorhersage();
+  zeigeVerlauf();
+  zeigeSonnenzeiten();
   zeigeKleidung();
 
   if (i == 0) {
@@ -295,6 +324,63 @@ function zeigeVorhersage() {
   }
 
   document.getElementById('vorhersage').innerHTML = html;
+}
+
+// Temperaturverlauf als Linie über den Tagen
+function zeigeVerlauf() {
+  let tage = document.getElementById('tage').value;
+  let temps = [];
+  for (let i = 0; i < tage; i++) {
+    temps.push(Math.round(wetter.daily.temperature_2m_max[i]));
+  }
+
+  let hoechste = Math.max(...temps);
+  let tiefste = Math.min(...temps);
+
+  // pro Grad 6 Pixel hoch, mindestens 20 und höchstens 120
+  let hoehe = Math.min(Math.max((hoechste - tiefste) * 6, 20), 120);
+
+  let punkte = '';
+  let namen = '';
+  let werte = '';
+  let punktX = 0;
+  let punktY = 0;
+
+  for (let i = 0; i < tage; i++) {
+    let x = (i + 0.5) * 100 / tage;
+    let y = 10 + hoehe / 2;
+    if (hoechste != tiefste) {
+      y = 10 + (hoechste - temps[i]) / (hoechste - tiefste) * hoehe;
+    }
+    punkte += x + ',' + y + ' ';
+
+    let klasse = '';
+    if (i == tag) {
+      klasse = 'gewaehlt';
+      punktX = x;
+      punktY = y;
+    }
+
+    // bei vielen Tagen nur die Abkürzung (Mi, Do, ...), sonst wird es am Handy zu eng
+    let name = tagName(i);
+    if (tage > 4 && i > 1) {
+      name = name.substring(0, 2);
+    }
+    namen += '<span class="' + klasse + '" onclick="tagAuswaehlen(' + i + ')">' + name + '</span>';
+    werte += '<span class="' + klasse + '" onclick="tagAuswaehlen(' + i + ')">' + temps[i] + '°</span>';
+  }
+
+  let hoechsterTag = tagName(temps.indexOf(hoechste));
+
+  document.getElementById('verlauf').innerHTML = '<p class="verlauf-hoechst">Höchstwert: ' + hoechste + ' °C (' + hoechsterTag + ')</p>'
+    + '<div class="verlauf-zeile">' + namen + '</div>'
+    + '<div class="verlauf-kurve">'
+    + '<svg viewBox="0 0 100 ' + (hoehe + 20) + '" height="' + (hoehe + 20) + '" preserveAspectRatio="none">'
+    + '<polyline points="' + punkte + '" />'
+    + '</svg>'
+    + '<span class="verlauf-punkt" style="left: ' + punktX + '%; top: ' + punktY + 'px;"></span>'
+    + '</div>'
+    + '<div class="verlauf-zeile verlauf-werte">' + werte + '</div>';
 }
 
 function zeigeKleidung() {

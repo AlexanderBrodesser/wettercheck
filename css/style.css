@@ -121,6 +121,64 @@ th {
   cursor: pointer;
 }
 
+/* Temperaturverlauf */
+.verlauf {
+  margin-bottom: 15px;
+  color: #666;
+}
+
+.verlauf-hoechst {
+  margin: 0 0 10px 0;
+  font-weight: bold;
+}
+
+.verlauf-zeile {
+  display: flex;
+}
+
+.verlauf-zeile span {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  cursor: pointer;
+  text-transform: capitalize;
+  overflow: hidden;
+}
+
+.verlauf-werte span {
+  font-size: 22px;
+}
+
+.verlauf .gewaehlt {
+  color: #222;
+  font-weight: bold;
+}
+
+.verlauf-kurve {
+  position: relative;
+}
+
+.verlauf svg {
+  width: 100%;
+  display: block;
+}
+
+.verlauf polyline {
+  fill: none;
+  stroke: #222;
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.verlauf-punkt {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background-color: #222;
+}
+
 tr.gewaehlt {
   background-color: #e3ecf5;
   font-weight: bold;
@@ -230,6 +288,14 @@ footer a {
   .temperatur {
     font-size: 36px;
   }
+
+  .verlauf-zeile span {
+    font-size: 11px;
+  }
+
+  .verlauf-werte span {
+    font-size: 18px;
+  }
 }
 
 /* Dark Mode */
@@ -246,7 +312,7 @@ body.dunkel {
   color: #8fb8e0;
 }
 
-.dunkel .details, .dunkel .hinweis {
+.dunkel .details, .dunkel .hinweis, .dunkel .ortszeit, .dunkel .sonnenzeiten {
   color: #aaa;
 }
 
@@ -276,6 +342,22 @@ body.dunkel {
   border-color: #6b3b36;
 }
 
+.dunkel .verlauf {
+  color: #aaa;
+}
+
+.dunkel .verlauf .gewaehlt, .dunkel .verlauf-hoechst {
+  color: white;
+}
+
+.dunkel .verlauf polyline {
+  stroke: white;
+}
+
+.dunkel .verlauf-punkt {
+  background-color: white;
+}
+
 .dunkel .kleidung img {
   filter: invert(1);
 }
@@ -289,6 +371,31 @@ body.dunkel {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.ortsname-gruppe {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ortszeit {
+  color: #666;
+  font-weight: bold;
+}
+
+/* Slider und Sonnenzeiten nebeneinander */
+.vorhersage-steuerung {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 15px;
+}
+
+.sonnenzeiten {
+  color: #666;
+  font-size: 14px;
 }
 
 .warnung {
