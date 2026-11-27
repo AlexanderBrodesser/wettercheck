@@ -83,10 +83,48 @@ input[type="range"] {
   margin-top: 0;
 }
 
-.temperatur {
-  font-size: 44px;
-  font-weight: bold;
+/* erstes Panel: alles in der Mitte, große dünne Temperatur */
+.aktuell {
+  position: relative;
+  text-align: center;
+}
+
+.ueberschrift {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 13px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.aktuell h2 {
   margin: 0;
+  font-family: system-ui, sans-serif;
+  font-size: 40px;
+  font-weight: 300;
+}
+
+.temperatur {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  font-size: 110px;
+  font-weight: 200;
+  line-height: 1.1;
+}
+
+.beschreibung {
+  margin: 0 0 10px 0;
+  font-size: 22px;
+}
+
+.hoch-tief {
+  margin: 0 0 10px 0;
+  font-size: 17px;
+}
+
+.aktuell .details {
+  margin: 0;
+  font-size: 14px;
 }
 
 .details, .hinweis {
@@ -286,7 +324,7 @@ footer a {
   }
 
   .temperatur {
-    font-size: 36px;
+    font-size: 80px;
   }
 
   .verlauf-zeile span {
@@ -312,7 +350,7 @@ body.dunkel {
   color: #8fb8e0;
 }
 
-.dunkel .details, .dunkel .hinweis, .dunkel .ortszeit, .dunkel .sonnenzeiten {
+.dunkel .details, .dunkel .hinweis, .dunkel .ortszeit, .dunkel .sonnenzeiten, .dunkel .ueberschrift {
   color: #aaa;
 }
 
@@ -369,8 +407,14 @@ body.dunkel {
 /* Warnsymbol neben dem Ortsnamen */
 .ortszeile {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: center;
+}
+
+/* Warnsymbol oben rechts in der Ecke */
+.aktuell .warnung {
+  position: absolute;
+  top: 15px;
+  right: 20px;
 }
 
 .ortsname-gruppe {

@@ -241,10 +241,12 @@ function zeigeWetter() {
   let min = Math.round(wetter.daily.temperature_2m_min[0]);
   let max = Math.round(wetter.daily.temperature_2m_max[0]);
 
-  document.getElementById('temperatur').innerHTML = Math.round(jetzt.temperature_2m) + ' °C';
+  document.getElementById('temperatur').innerHTML = Math.round(jetzt.temperature_2m) + '°';
   document.getElementById('beschreibung').innerHTML = wetterText(jetzt.weather_code);
-  document.getElementById('details').innerHTML = 'Gefühlt ' + Math.round(jetzt.apparent_temperature) + ' °C, heute ' + min + ' bis ' + max + ' °C<br>'
-    + 'Wind: ' + Math.round(jetzt.wind_speed_10m) + ' km/h, Regen: ' + wetter.daily.precipitation_probability_max[0] + ' %';
+  // H = Höchstwert, T = Tiefstwert von heute
+  document.getElementById('hoch-tief').innerHTML = 'H: ' + max + '° &nbsp; T: ' + min + '°';
+  document.getElementById('details').innerHTML = 'Gefühlt ' + Math.round(jetzt.apparent_temperature) + '°, Wind ' + Math.round(jetzt.wind_speed_10m)
+    + ' km/h, Regen ' + wetter.daily.precipitation_probability_max[0] + ' %';
 }
 
 function zeigeVideo(code, wind) {
