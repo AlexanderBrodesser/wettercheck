@@ -107,7 +107,7 @@ input[type="range"] {
 .temperatur {
   margin: 0;
   font-family: system-ui, sans-serif;
-  font-size: 110px;
+  font-size: 80px;
   font-weight: 200;
   line-height: 1.1;
 }
@@ -324,7 +324,7 @@ footer a {
   }
 
   .temperatur {
-    font-size: 80px;
+    font-size: 64px;
   }
 
   .verlauf-zeile span {
@@ -417,15 +417,10 @@ body.dunkel {
   right: 20px;
 }
 
-.ortsname-gruppe {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-}
-
 .ortszeit {
+  margin: 2px 0 0 0;
   color: #666;
-  font-weight: bold;
+  font-size: 14px;
 }
 
 /* Slider und Sonnenzeiten nebeneinander */
